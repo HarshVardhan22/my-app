@@ -1,23 +1,42 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { IProduct } from "../home.interface";
+import { useAppSelector, useAppDispatch } from '../../../app/hooks';
+import {
+  decrement,
+  increment,
+  getProductsInCart
+} from '../../cart/cartSlice';
+import { useSelector } from "react-redux";
 
 export const Product = (props: IProduct) => {
+const dispatch = useAppDispatch();
+const productQuantityInCart = useSelector((state:any) => {
+    let count = 0
+    state?.cart?.products?.forEach((item:IProduct)=>{
+    if(item && item.id===props.id){
+        count = item.quantity
+    }})
+    return count;
+})
+  
   return (
-    <Wrapper key={props.id}>
+    <Wrapper>
       <Image src={props.image} />
       <Title>{props.title}</Title>
-      <HorizontalWrapper>
-        <Price> Price : ${props.price}</Price>
-        <Button>ADD TO CART</Button>
-      </HorizontalWrapper>
 
-      {/* <Button>ADD TO CART</Button> */}
-      {/* <CartCounterWrapper>
-        <CartButtons>+</CartButtons>
-        <Text>2</Text>
-        <CartButtons>-</CartButtons>
-      </CartCounterWrapper> */}
+      {productQuantityInCart > 0 ? (
+        <CartCounterWrapper>
+          <CartButtons onClick={()=>{dispatch(increment(props))}}>+</CartButtons>
+          <Text>{productQuantityInCart}</Text>
+          <CartButtons onClick={()=>{dispatch(decrement(props))}}>-</CartButtons>
+        </CartCounterWrapper>
+      ) : (
+        <HorizontalWrapper>
+          <Price> Price : ${props.price}</Price>
+          <Button onClick={()=>{dispatch(increment(props))}}>ADD TO CART</Button>
+        </HorizontalWrapper>
+      )}
     </Wrapper>
   );
 };
